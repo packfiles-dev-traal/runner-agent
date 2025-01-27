@@ -1,0 +1,100 @@
+# This Action is used by Packfiles Warp to perform migration-related tasks
+# in your GitHub environment.
+#
+# Packfiles takes the security of your migration seriously, and we're
+# committed to providing you with total visibility and granular control
+# over how and where your data is processed.
+#
+# For more information about the Warp Runner Agent, refer to our
+# documentation at https://pack.fm/about-warp-runner
+
+name: "Packfiles Warp Runner Agent"
+description: "https://pack.fm/about-warp-runner"
+author: "packfiles"
+branding:
+  icon: "package"
+  color: "orange"
+
+inputs:
+  boot-payload:
+    description: "Agent Boot Payload"
+    required: true
+  migration-hq-vars:
+    description: "Migration HQ Repository Variables"
+    required: true
+  pkfs-runner-env:
+    description: "Runner Environment"
+    required: false
+    default: "production"
+  pkfs-warp-api-host:
+    description: "Warp API Host"
+    required: false
+    default: "https://warp.packfiles.io"
+  pkfs-agent-tag:
+    description: "Agent Image Tag"
+    required: false
+    default: "latest"
+  PKFS_MASTER_KEY:
+    description: "Credentials Vault Master Key"
+    required: true
+  GITHUB_TOKEN:
+    description: "Workflow GitHub Token"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check Out Migration HQ Repository
+      uses: actions/checkout@v4
+
+    - name: Launch Warp Runner Agent
+      continue-on-error: true
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        PKFS_MASTER_KEY: ${{ inputs.PKFS_MASTER_KEY }}
+        PROJECT_REPO_VARS: ${{ toJSON(inputs.migration-hq-vars) }}
+        ACTIONS_GITHUB_CONTEXT: ${{ toJSON(github) }}
+        ACTIONS_JOB_CONTEXT: ${{ toJSON(job) }}
+        ACTIONS_RUNNER_CONTEXT: ${{ toJSON(runner) }}
+        BOOT_PAYLOAD: ${{ inputs.boot-payload }}
+        PKFS_RUNNER_ENV: ${{ inputs.pkfs-runner-env }}
+        PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
+      shell: bash
+      run: |
+        docker pull ghcr.io/packfiles/runner:${{ inputs.pkfs-agent-tag }}
+
+        sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
+
+        docker run --rm \
+          -v "$GITHUB_WORKSPACE:/project_repository" \
+          -e GITHUB_TOKEN \
+          -e PKFS_MASTER_KEY \
+          -e PROJECT_REPO_VARS \
+          -e ACTIONS_GITHUB_CONTEXT \
+          -e ACTIONS_JOB_CONTEXT \
+          -e ACTIONS_RUNNER_CONTEXT \
+          -e BOOT_PAYLOAD \
+          -e PKFS_RUNNER_ENV \
+          -e PKFS_RUNNER_API_HOST \
+          ghcr.io/packfiles/runner:${{ inputs.pkfs-agent-tag }}
+
+    - name: Runner Agent Termination Signal
+      continue-on-error: true
+      env:
+        BOOT_PAYLOAD: ${{ inputs.boot-payload }}
+        WARP_API_HOST: ${{ inputs.pkfs-warp-api-host }}
+      shell: bash
+      run: |
+        echo "$BOOT_PAYLOAD" | curl -s -X POST \
+          -H "Content-Type: application/json" \
+          -H "X-Packfiles-Api-Version: 2024-07-16" \
+          -H "User-Agent: Packfiles Runner Agent - Sighup" \
+          -m 10 --silent -o /dev/null \
+          --data-binary @- "$WARP_API_HOST/api/runners/sighup"
+
+    - name: Upload Runner Agent Logs and Artifacts
+      uses: actions/upload-artifact@v4.3.6
+      with:
+        name: job-output
+        path: ./job_output
+        if-no-files-found: ignore
