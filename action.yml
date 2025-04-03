@@ -61,7 +61,7 @@ runs:
         PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
       shell: bash
       run: |
-        docker pull ghcr.io/packfiles/runner:${{ inputs.pkfs-agent-tag }}
+        docker pull ghcr.io/packfiles-dev/runner:${{ inputs.pkfs-agent-tag }}
 
         sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
 
@@ -76,7 +76,7 @@ runs:
           -e BOOT_PAYLOAD \
           -e PKFS_RUNNER_ENV \
           -e PKFS_RUNNER_API_HOST \
-          ghcr.io/packfiles/runner:${{ inputs.pkfs-agent-tag }}
+          ghcr.io/packfiles-dev/runner:${{ inputs.pkfs-agent-tag }}
 
     - name: Runner Agent Termination Signal
       continue-on-error: true
