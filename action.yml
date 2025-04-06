@@ -33,7 +33,7 @@ inputs:
   pkfs-agent-tag:
     description: "Agent Image Tag"
     required: false
-    default: "bbstest-2"
+    default: "latest"
   PKFS_MASTER_KEY:
     description: "Credentials Vault Master Key"
     required: true
