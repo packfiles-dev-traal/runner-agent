@@ -47,6 +47,13 @@ runs:
     - name: Check Out Migration HQ Repository
       uses: actions/checkout@v4
 
+    - name: GHCR Login
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Launch Warp Runner Agent
       continue-on-error: true
       env:
