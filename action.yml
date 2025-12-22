@@ -91,7 +91,7 @@ runs:
           -e BOOT_PAYLOAD \
           -e PKFS_RUNNER_ENV \
           -e PKFS_RUNNER_API_HOST \
-          ghcr.io/${{ inputs.pkfs-agent-org }}/${ inputs.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
+          ghcr.io/${{ inputs.pkfs-agent-org }}/${{ inputs.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
     - name: Runner Agent Termination Signal
       continue-on-error: true
