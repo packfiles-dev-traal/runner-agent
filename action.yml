@@ -31,9 +31,17 @@ inputs:
     required: false
     default: "https://warp.packfiles.io"
   pkfs-agent-tag:
-    description: "Agent Image Tag"
+    description: "Runner Agent Image Tag"
     required: false
     default: "latest"
+  pkfs-agent-org:
+    description: "Runner Agent Image Org"
+    required: false
+    default: "packfiles"
+  pkfs-agent-name:
+    description: "Runner Agent Image Name"
+    required: false
+    default: "runner"
   PKFS_MASTER_KEY:
     description: "Credentials Vault Master Key"
     required: true
@@ -68,7 +76,7 @@ runs:
         PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
       shell: bash
       run: |
-        docker pull ghcr.io/${{ input.pkfs-runner-image-org }}/${{ input.pkfs-runner-image-name }}:${{ inputs.pkfs-runner-image-tag }}
+        docker pull ghcr.io/${{ input.pkfs-agent-org }}/${{ input.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
         sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
 
@@ -83,7 +91,7 @@ runs:
           -e BOOT_PAYLOAD \
           -e PKFS_RUNNER_ENV \
           -e PKFS_RUNNER_API_HOST \
-          ghcr.io/${{ input.pkfs-runner-image-org }}/${ input.pkfs-runner-image-name }}:${{ inputs.pkfs-runner-image-tag }}
+          ghcr.io/${{ input.pkfs-agent-org }}/${ input.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
     - name: Runner Agent Termination Signal
       continue-on-error: true
