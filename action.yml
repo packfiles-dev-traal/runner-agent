@@ -30,7 +30,7 @@ inputs:
     description: "Warp API Host"
     required: false
     default: "https://warp.packfiles.io"
-  pkfs-agent-tag:
+  pkfs-agent-tag: # pr-{number} for _successful_ runner PR builds
     description: "Runner Agent Image Tag"
     required: false
     default: "latest"
@@ -38,7 +38,7 @@ inputs:
     description: "Runner Agent Image Org"
     required: false
     default: "packfiles"
-  pkfs-agent-name:
+  pkfs-agent-name: # if runner PR, this should be "runner-preview"
     description: "Runner Agent Image Name"
     required: false
     default: "runner"
@@ -76,7 +76,7 @@ runs:
         PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
       shell: bash
       run: |
-        docker pull ghcr.io/${{ input.pkfs-agent-org }}/${{ input.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
+        docker pull ghcr.io/${{ inputs.pkfs-agent-org }}/${{ inputs.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
         sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
 
