@@ -76,6 +76,14 @@ runs:
         PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
       shell: bash
       run: |
+        PROJECT_REPO_MCP_JSON=""
+        if [ -f "$GITHUB_WORKSPACE/.mcp.json" ]; then
+          PROJECT_REPO_MCP_JSON="$(cat "$GITHUB_WORKSPACE/.mcp.json")"
+          echo "Detected project .mcp.json and forwarding to runner container."
+        else
+          echo "No project .mcp.json found at repository root."
+        fi
+
         docker pull ghcr.io/${{ inputs.pkfs-agent-org }}/${{ inputs.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
         sudo chown -R $USER:$USER "$GITHUB_WORKSPACE"
@@ -91,6 +99,7 @@ runs:
           -e BOOT_PAYLOAD \
           -e PKFS_RUNNER_ENV \
           -e PKFS_RUNNER_API_HOST \
+          -e PROJECT_REPO_MCP_JSON \
           ghcr.io/${{ inputs.pkfs-agent-org }}/${{ inputs.pkfs-agent-name }}:${{ inputs.pkfs-agent-tag }}
 
     - name: Runner Agent Termination Signal
