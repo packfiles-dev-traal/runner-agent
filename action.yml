@@ -42,6 +42,10 @@ inputs:
     description: "Runner Agent Image Name"
     required: false
     default: "runner"
+  project-repo-mcp-json:
+    description: "Project repository MCP JSON payload"
+    required: false
+    default: ""
   PKFS_MASTER_KEY:
     description: "Credentials Vault Master Key"
     required: true
@@ -74,10 +78,14 @@ runs:
         BOOT_PAYLOAD: ${{ inputs.boot-payload }}
         PKFS_RUNNER_ENV: ${{ inputs.pkfs-runner-env }}
         PKFS_RUNNER_API_HOST: ${{ inputs.pkfs-warp-api-host }}
+        PROJECT_REPO_MCP_JSON_INPUT: ${{ inputs.project-repo-mcp-json }}
       shell: bash
       run: |
         PROJECT_REPO_MCP_JSON=""
-        if [ -f "$GITHUB_WORKSPACE/.mcp.json" ]; then
+        if [ -n "$PROJECT_REPO_MCP_JSON_INPUT" ]; then
+          PROJECT_REPO_MCP_JSON="$PROJECT_REPO_MCP_JSON_INPUT"
+          echo "Using project MCP JSON from workflow input."
+        elif [ -f "$GITHUB_WORKSPACE/.mcp.json" ]; then
           PROJECT_REPO_MCP_JSON="$(cat "$GITHUB_WORKSPACE/.mcp.json")"
           echo "Detected project .mcp.json and forwarding to runner container."
         else
